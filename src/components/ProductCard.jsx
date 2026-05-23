@@ -1,7 +1,20 @@
 import { FaStar } from 'react-icons/fa'
 import '../styles/productcard.css'
+import { useContext } from 'react'
+import { ProductContext } from '../context/ProductContext'
 
 function ProductCard({ product }) {
+  const { products, setProducts } =
+  useContext(ProductContext)
+  const handleDelete = (id) => {
+
+  const updatedProducts =
+    products.filter(
+      (product) => product.id !== id
+    )
+
+  setProducts(updatedProducts)
+}
   return (
     <div className='product-card'>
 
@@ -31,6 +44,12 @@ function ProductCard({ product }) {
           <p className='rating-text'>
             4.0 Rating (120 Reviews)
           </p>
+          <button
+  className='delete-btn'
+  onClick={() => handleDelete(product.id)}
+>
+  Delete Product
+</button>
 
         </div>
 
