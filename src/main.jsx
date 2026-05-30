@@ -11,21 +11,29 @@ import {
   ProductProvider,
 } from './context/ProductContext'
 
+import {
+  AuthProvider,
+} from './context/AuthContext'
+
 ReactDOM.createRoot(
   document.getElementById('root')
 ).render(
 
   <React.StrictMode>
 
-    <ProductProvider>
+    <AuthProvider>
 
-      <BrowserRouter>
+  <ProductProvider>
 
-        <App />
+    <BrowserRouter>
 
-      </BrowserRouter>
+      <App />
 
-    </ProductProvider>
+    </BrowserRouter>
+
+  </ProductProvider>
+
+</AuthProvider>
 
   </React.StrictMode>
 )

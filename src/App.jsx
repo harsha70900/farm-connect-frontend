@@ -8,6 +8,8 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 
 import { Routes, Route } from 'react-router-dom'
+import ProtectedRoute
+from './components/ProtectedRoute'
 
 function App() {
 
@@ -32,10 +34,10 @@ function App() {
         element={<Register />}
       />
 
-      <Route
-        path='/dashboard'
-        element={<Dashboard />}
-      />
+<Route
+  path='/dashboard'
+  element={<Dashboard />}
+/>
 
       <Route
         path='/add-product'

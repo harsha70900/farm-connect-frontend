@@ -12,6 +12,9 @@ import {
   Link,
 } from 'react-router-dom'
 
+import { AuthContext }
+from '../context/AuthContext'
+
 function ProductCard({ product }) {
 
   const {
@@ -20,24 +23,38 @@ function ProductCard({ product }) {
     setEditProduct,
   } = useContext(ProductContext)
 
+  const { isLoggedIn } =
+  useContext(AuthContext)
+
   const navigate = useNavigate()
 
   const handleDelete = (id) => {
 
-    const updatedProducts =
-      products.filter(
-        (product) => product.id !== id
-      )
+  if (!isLoggedIn) {
 
-    setProducts(updatedProducts)
+    alert('Please login first')
+
+    navigate('/login')
+
+    return
+  }
   }
 
   const handleEdit = () => {
 
-    setEditProduct(product)
+  if (!isLoggedIn) {
 
-    navigate('/add-product')
+    alert('Please login first')
+
+    navigate('/login')
+
+    return
   }
+
+  setEditProduct(product)
+
+  navigate('/add-product')
+}
 
   return (
 

@@ -1,8 +1,35 @@
 import Navbar from '../components/Navbar'
 import '../styles/auth.css'
 import { Link } from 'react-router-dom'
+import { useContext } from 'react'
+
+import {
+  AuthContext,
+} from '../context/AuthContext'
+
+import { useNavigate }
+from 'react-router-dom'
+
 
 function Login() {
+const { login } =
+  useContext(AuthContext)
+
+const navigate = useNavigate()
+
+const handleLogin = (e) => {
+
+  e.preventDefault()
+
+  login()
+
+  toast.success(
+    'Login Successful 🚀'
+  )
+
+  navigate('/dashboard')
+}
+
   return (
     <>
       <Navbar />
@@ -29,7 +56,10 @@ function Login() {
 
             <h2>Login</h2>
 
-            <form className='auth-form'>
+            <form
+  className='auth-form'
+  onSubmit={handleLogin}
+>
 
               <div className='form-group'>
                 <label>Email</label>
