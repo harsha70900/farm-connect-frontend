@@ -18,34 +18,31 @@ function Products() {
   const [category, setCategory] = useState('All')
 
   const {
-  data: products = [],
-  isLoading,
-  isFetching
-} = useQuery({
-  queryKey: ['products'],
+    data: products = [],
+    isLoading,
+    isFetching
+  } = useQuery({
+    queryKey: ['products'],
 
-  queryFn: async () => {
+    queryFn: async () => {
+      const response = await api.get('/products')
 
-    const response = await api.get('/products')
+      localStorage.setItem(
+        'products',
+        JSON.stringify(response.data)
+      )
 
-    localStorage.setItem(
-      'products',
-      JSON.stringify(response.data)
-    )
+      return response.data
+    },
 
-    return response.data
-  },
+    placeholderData: () => {
+      const cachedProducts = localStorage.getItem('products')
 
-  placeholderData: () => {
-
-    const cachedProducts =
-      localStorage.getItem('products')
-
-    return cachedProducts
-      ? JSON.parse(cachedProducts)
-      : []
-  }
-})
+      return cachedProducts
+        ? JSON.parse(cachedProducts)
+        : []
+    }
+  })
 
   const deleteMutation = useMutation({
 
@@ -53,16 +50,13 @@ function Products() {
 
     onSuccess: async () => {
 
-      // Fetch latest products
       const response = await api.get('/products')
 
-      // Update cache
       localStorage.setItem(
         'products',
         JSON.stringify(response.data)
       )
 
-      // Refresh React Query cache
       queryClient.invalidateQueries({
         queryKey: ['products']
       })
@@ -71,7 +65,6 @@ function Products() {
     },
 
     onError: () => {
-
       alert('Failed to Delete Product')
     }
 
@@ -92,29 +85,6 @@ function Products() {
 
   })
 
-  // Only show loading when nothing is cached
-  if (isLoading && products.length === 0) {
-
-    return (
-      <>
-        <Navbar />
-
-        <div className="products-page container">
-
-          <h2
-            style={{
-              textAlign: "center",
-              marginTop: "120px"
-            }}
-          >
-            Loading products...
-          </h2>
-
-        </div>
-      </>
-    )
-  }
-
   return (
     <>
       <Navbar />
@@ -125,20 +95,17 @@ function Products() {
           Explore Fresh Products
         </h1>
 
-        {/* Background Refresh Indicator */}
         {isFetching && products.length > 0 && (
-
           <p
             style={{
-              textAlign: "center",
-              color: "#28a745",
-              fontWeight: "600",
-              marginBottom: "20px"
+              textAlign: 'center',
+              color: '#28a745',
+              fontWeight: '600',
+              marginBottom: '20px'
             }}
           >
             🔄 Refreshing latest products...
           </p>
-
         )}
 
         <div className='products-controls'>
@@ -147,9 +114,7 @@ function Products() {
             type='text'
             placeholder='Search products...'
             value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
+            onChange={(e) => setSearch(e.target.value)}
           />
 
           <div className='filter-buttons'>
@@ -176,7 +141,20 @@ function Products() {
 
         <div className='products-grid'>
 
-          {filteredProducts.length > 0 ? (
+          {/* Loading */}
+          {(isLoading || (isFetching && products.length === 0)) ? (
+
+            <div
+              style={{
+                width: '100%',
+                textAlign: 'center',
+                marginTop: '60px'
+              }}
+            >
+              <h3>Loading Products...</h3>
+            </div>
+
+          ) : filteredProducts.length > 0 ? (
 
             filteredProducts.map((product) => (
 
