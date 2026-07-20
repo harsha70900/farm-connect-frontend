@@ -3,45 +3,57 @@ import {
   FaUsers,
   FaShoppingCart,
   FaChartLine,
-} from 'react-icons/fa'
+} from "react-icons/fa";
 
-import Navbar from '../components/Navbar'
-import '../styles/dashboard.css'
+import Navbar from "../components/Navbar";
+import "../styles/dashboard.css";
 
-import api from '../api/AxiosConfig'
+import api from "../api/AxiosConfig";
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery } from "@tanstack/react-query";
 
 function Dashboard() {
-
   const {
     data: products = [],
-    isLoading
+    isLoading,
+    isFetching,
   } = useQuery({
-
-    queryKey: ['products'],
+    queryKey: ["products"],
 
     queryFn: async () => {
+      const response = await api.get("/products");
 
-      const response =
-        await api.get('/products')
+      // Save latest products to localStorage
+      localStorage.setItem(
+        "products",
+        JSON.stringify(response.data)
+      );
 
-      return response.data
-    }
+      return response.data;
+    },
 
-  })
+    // Load cached data immediately
+    initialData: () => {
+      const cachedProducts =
+        localStorage.getItem("products");
 
-  const productCount = products.length
+      if (cachedProducts) {
+        return JSON.parse(cachedProducts);
+      }
 
-  const totalQuantity =
-    products.reduce(
-      (sum, product) =>
-        sum + product.quantity,
-      0
-    )
+      return [];
+    },
+  });
 
-  if (isLoading) {
+  const productCount = products.length;
 
+  const totalQuantity = products.reduce(
+    (sum, product) => sum + product.quantity,
+    0
+  );
+
+  // Only show loading when there is no cache
+  if (isLoading && products.length === 0) {
     return (
       <>
         <Navbar />
@@ -51,58 +63,73 @@ function Dashboard() {
             textAlign: "center",
             marginTop: "150px",
             fontSize: "24px",
-            fontWeight: "600"
+            fontWeight: "600",
           }}
         >
           Loading Dashboard...
         </div>
-
       </>
-    )
+    );
   }
 
   return (
     <>
       <Navbar />
 
-      <div className='dashboard-page container'>
+      <div className="dashboard-page container">
 
-        <div className='dashboard-header'>
+        <div className="dashboard-header">
           <h1>Dashboard Analytics</h1>
 
           <p>
-            Monitor products, buyers, and marketplace insights.
+            Monitor products, buyers, and marketplace
+            insights.
           </p>
         </div>
 
-        <div className='dashboard-cards'>
+        {/* Refresh Message */}
 
-          <div className='dashboard-card'>
-            <FaBox className='dashboard-icon' />
+        {isFetching && products.length > 0 && (
+          <p
+            style={{
+              textAlign: "center",
+              color: "#28a745",
+              fontWeight: "600",
+              marginBottom: "20px",
+            }}
+          >
+            🔄 Refreshing dashboard...
+          </p>
+        )}
+
+        <div className="dashboard-cards">
+
+          <div className="dashboard-card">
+            <FaBox className="dashboard-icon" />
 
             <h2>{productCount}</h2>
 
             <p>Total Products</p>
           </div>
 
-          <div className='dashboard-card'>
-            <FaUsers className='dashboard-icon' />
+          <div className="dashboard-card">
+            <FaUsers className="dashboard-icon" />
 
             <h2>{totalQuantity}</h2>
 
             <p>Total Inventory</p>
           </div>
 
-          <div className='dashboard-card'>
-            <FaShoppingCart className='dashboard-icon' />
+          <div className="dashboard-card">
+            <FaShoppingCart className="dashboard-icon" />
 
             <h2>88</h2>
 
             <p>Buyers</p>
           </div>
 
-          <div className='dashboard-card'>
-            <FaChartLine className='dashboard-icon' />
+          <div className="dashboard-card">
+            <FaChartLine className="dashboard-icon" />
 
             <h2>95%</h2>
 
@@ -111,21 +138,19 @@ function Dashboard() {
 
         </div>
 
-        <div className='dashboard-table-section'>
+        <div className="dashboard-table-section">
 
           <h2>Recent Products</h2>
 
-          <table className='dashboard-table'>
+          <table className="dashboard-table">
 
             <thead>
 
               <tr>
-
                 <th>Product</th>
                 <th>Category</th>
                 <th>Price</th>
                 <th>Status</th>
-
               </tr>
 
             </thead>
@@ -143,13 +168,9 @@ function Dashboard() {
                   <td>₹{product.price}</td>
 
                   <td>
-
-                    {
-                      product.quantity > 0
-                        ? "Available"
-                        : "Out of Stock"
-                    }
-
+                    {product.quantity > 0
+                      ? "Available"
+                      : "Out of Stock"}
                   </td>
 
                 </tr>
@@ -163,9 +184,8 @@ function Dashboard() {
         </div>
 
       </div>
-
     </>
-  )
+  );
 }
 
-export default Dashboard
+export default Dashboard;
