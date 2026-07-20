@@ -19,20 +19,53 @@ function Products() {
 
   const {
     data: products = [],
-    isLoading
+    isLoading,
+    isFetching
   } = useQuery({
     queryKey: ['products'],
+
     queryFn: async () => {
+
       const response = await api.get('/products')
+
+      // Save latest products into localStorage
+      localStorage.setItem(
+        'products',
+        JSON.stringify(response.data)
+      )
+
       return response.data
+    },
+
+    // Load cached products immediately
+    initialData: () => {
+
+      const cachedProducts = localStorage.getItem('products')
+
+      if (cachedProducts) {
+        return JSON.parse(cachedProducts)
+      }
+
+      return []
     }
   })
 
   const deleteMutation = useMutation({
+
     mutationFn: (id) => api.delete(`/products/${id}`),
 
-    onSuccess: () => {
+    onSuccess: async () => {
 
+      // Fetch latest products
+      const response = await api.get('/products')
+
+      // Update cache
+      localStorage.setItem(
+        'products',
+        JSON.stringify(response.data)
+      )
+
+      // Refresh React Query cache
       queryClient.invalidateQueries({
         queryKey: ['products']
       })
@@ -44,6 +77,7 @@ function Products() {
 
       alert('Failed to Delete Product')
     }
+
   })
 
   const filteredProducts = products.filter((product) => {
@@ -61,7 +95,8 @@ function Products() {
 
   })
 
-  if (isLoading) {
+  // Only show loading when nothing is cached
+  if (isLoading && products.length === 0) {
 
     return (
       <>
@@ -92,6 +127,22 @@ function Products() {
         <h1 className='products-title'>
           Explore Fresh Products
         </h1>
+
+        {/* Background Refresh Indicator */}
+        {isFetching && products.length > 0 && (
+
+          <p
+            style={{
+              textAlign: "center",
+              color: "#28a745",
+              fontWeight: "600",
+              marginBottom: "20px"
+            }}
+          >
+            🔄 Refreshing latest products...
+          </p>
+
+        )}
 
         <div className='products-controls'>
 
@@ -128,15 +179,33 @@ function Products() {
 
         <div className='products-grid'>
 
-          {filteredProducts.map((product) => (
+          {filteredProducts.length > 0 ? (
 
-            <ProductCard
-              key={product.id}
-              product={product}
-              onDelete={() => deleteMutation.mutate(product.id)}
-            />
+            filteredProducts.map((product) => (
 
-          ))}
+              <ProductCard
+                key={product.id}
+                product={product}
+                onDelete={() =>
+                  deleteMutation.mutate(product.id)
+                }
+              />
+
+            ))
+
+          ) : (
+
+            <h3
+              style={{
+                textAlign: 'center',
+                width: '100%',
+                marginTop: '50px'
+              }}
+            >
+              No Products Found
+            </h3>
+
+          )}
 
         </div>
 
