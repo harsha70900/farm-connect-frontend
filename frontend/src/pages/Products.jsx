@@ -18,37 +18,34 @@ function Products() {
   const [category, setCategory] = useState('All')
 
   const {
-    data: products = [],
-    isLoading,
-    isFetching
-  } = useQuery({
-    queryKey: ['products'],
+  data: products = [],
+  isLoading,
+  isFetching
+} = useQuery({
+  queryKey: ['products'],
 
-    queryFn: async () => {
+  queryFn: async () => {
 
-      const response = await api.get('/products')
+    const response = await api.get('/products')
 
-      // Save latest products into localStorage
-      localStorage.setItem(
-        'products',
-        JSON.stringify(response.data)
-      )
+    localStorage.setItem(
+      'products',
+      JSON.stringify(response.data)
+    )
 
-      return response.data
-    },
+    return response.data
+  },
 
-    // Load cached products immediately
-    initialData: () => {
+  placeholderData: () => {
 
-      const cachedProducts = localStorage.getItem('products')
+    const cachedProducts =
+      localStorage.getItem('products')
 
-      if (cachedProducts) {
-        return JSON.parse(cachedProducts)
-      }
-
-      return []
-    }
-  })
+    return cachedProducts
+      ? JSON.parse(cachedProducts)
+      : []
+  }
+})
 
   const deleteMutation = useMutation({
 
